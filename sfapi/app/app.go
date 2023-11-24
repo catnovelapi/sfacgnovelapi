@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/catnovelapi/sfacgnovelapi/sfapi/api"
 	"github.com/tidwall/gjson"
+	"strings"
 	"sync"
 )
 
@@ -16,7 +17,8 @@ func NewApp(api *api.API) *APP {
 	return &APP{API: api}
 }
 
-func (sfacg *APP) GetChapterDirList(bookId any, chapterVerification bool) ([]gjson.Result, error) {
+// GetChapterDirList get chapter list bookId:book id, vipVerification:whether vip verification is required, verificationFunc:verification function, return true to skip
+func (sfacg *APP) GetChapterDirList(bookId any, vipVerification bool, verificationFunc func(gjson.Result) bool) ([]gjson.Result, error) {
 	response, err := sfacg.API.GetChapterDirApi(context.TODO(), fmt.Sprintf("%v", bookId))
 	if err != nil {
 		return nil, err
@@ -24,7 +26,12 @@ func (sfacg *APP) GetChapterDirList(bookId any, chapterVerification bool) ([]gjs
 	var chapterList []gjson.Result
 	for _, i := range response.Get("volumeList").Array() {
 		for _, j := range i.Get("chapterList").Array() {
-			if chapterVerification {
+			if verificationFunc != nil {
+				if verificationFunc(j) {
+					continue
+				}
+			}
+			if vipVerification {
 				if j.Get("originNeedFireMoney").Int() != 0 {
 					continue
 				}
@@ -39,12 +46,19 @@ func (sfacg *APP) GetChapterDirList(bookId any, chapterVerification bool) ([]gjs
 }
 
 func (sfacg *APP) GetChapterContentText(chapterId any) (string, error) {
-	if response, err := sfacg.API.GetContentInfoApi(context.TODO(), fmt.Sprintf("%v", chapterId)); err != nil {
+	response, err := sfacg.API.GetContentInfoApi(context.TODO(), fmt.Sprintf("%v", chapterId))
+	if err != nil {
 		return "", err
-	} else {
-		return response.Get("expand.content").String(), nil
 	}
+	var content = response.Get("ntitle").String() + "\n"
+	for _, i := range strings.Split(response.Get("expand.content").String(), "\n") {
+		if j := strings.ReplaceAll(strings.TrimSpace(i), "　", ""); j != "" {
+			content += fmt.Sprintf("　　%v\n", j)
+		}
+	}
+	return content, nil
 }
+
 func addFunc(bookId any, fs ...func(bookId any) (gjson.Result, error)) {
 	wg := sync.WaitGroup{}
 	for _, i := range fs {

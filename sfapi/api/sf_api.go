@@ -25,8 +25,6 @@ func NewApi() *API {
 	}
 }
 
-const defaultBookInfoExpand = "chapterCount,bigBgBanner,bigNovelCover,typeName,intro,fav,ticket,pointCount,tags,sysTags,signlevel,discount,discountExpireDate,totalNeedFireMoney,rankinglist,originTotalNeedFireMoney,firstchapter,latestchapter,latestcommentdate,essaytag,auditCover,preOrderInfo,customTag,topic,unauditedCustomtag,homeFlag,isbranch,essayawards"
-
 // SetNewSem sets the maximum number of concurrent requests
 func (sfacg *API) SetNewSem(maxConcurrentRequests int) {
 	sfacg.Lock()
@@ -41,7 +39,7 @@ func (sfacg *API) GetBookInfoApi(ctx context.Context, bookId string) (gjson.Resu
 		return gjson.Result{}, err
 	}
 	defer sfacg.sem.Release(1)
-	return sfacg.Req.Get(fmt.Sprintf("/novels/%v", bookId), sfclient.Query{"expand": defaultBookInfoExpand})
+	return sfacg.Req.Get(fmt.Sprintf("/novels/%v", bookId), sfclient.Q().SetBookInfoQuery())
 }
 
 func (sfacg *API) GetBookCommentBarrageNewVersionApi(bookId any) (gjson.Result, error) {
@@ -70,7 +68,7 @@ func (sfacg *API) GetBookSignlevelApi(bookId any) (gjson.Result, error) {
 }
 
 func (sfacg *API) BookListApi(bookId any) (gjson.Result, error) {
-	return sfacg.Req.Get(fmt.Sprintf("/novel/%v/bookList", bookId), sfclient.Query{"size": 3, "page": 0})
+	return sfacg.Req.Get(fmt.Sprintf("/novel/%v/bookList", bookId), sfclient.Q().SetPageQuery(0))
 }
 
 func (sfacg *API) BookFansList(bookId any) (gjson.Result, error) {
@@ -95,14 +93,12 @@ func (sfacg *API) LoginUsernameApi(username, password string) (*resty.Response, 
 func (sfacg *API) SearchNovelsResultApi(keyword string, page string) (gjson.Result, error) {
 	query := sfclient.Query{
 		"q":          keyword,
-		"page":       page,
-		"size":       "12",
 		"sort":       "hot",
 		"systagids":  "",
 		"isFinish":   "-1",
 		"updateDays": "-1",
-		"expand":     defaultBookInfoExpand}
-	return sfacg.Req.Get("/search/novels/result/new", query)
+	}
+	return sfacg.Req.Get("/search/novels/result/new", query.SetBookInfoQuery().SetPageQuery(page))
 }
 
 func (sfacg *API) GetContentInfoApi(ctx context.Context, chapterId string) (gjson.Result, error) {
@@ -126,11 +122,11 @@ func (sfacg *API) GetActpushesApi(bookId any) (gjson.Result, error) {
 	return sfacg.Req.Get(fmt.Sprintf("/novels/%v/actpushes", bookId), sfclient.Query{"filter": "android", "pageType": 1})
 }
 func (sfacg *API) GetSpecialpushsNewNovelApi(page any) (gjson.Result, error) {
-	return sfacg.Req.Get("/novels/specialpushs", sfclient.Query{"pushNames": "newpush", "page": page, "size": 8, "expand": defaultBookInfoExpand})
+	return sfacg.Req.Get("/novels/specialpushs", (sfclient.Query{"pushNames": "newpush"}).SetBookInfoQuery().SetPageQuery(page))
 }
 
 func (sfacg *API) GetSpecialpushsHotNovelApi(page any) (gjson.Result, error) {
-	return sfacg.Req.Get("/novels/specialpushs", sfclient.Query{"pushNames": "hotpush", "page": page, "size": 8, "expand": defaultBookInfoExpand})
+	return sfacg.Req.Get("/novels/specialpushs", (sfclient.Query{"pushNames": "hotpush"}).SetBookInfoQuery().SetPageQuery(page))
 }
 func (sfacg *API) GetChapterDirApi(ctx context.Context, bookId string) (gjson.Result, error) {
 	// Acquire a token, limiting the number of concurrent requests
@@ -150,8 +146,7 @@ func (sfacg *API) GetBookShelfApi() (gjson.Result, error) {
 }
 
 func (sfacg *API) GetBookListByTagApi(tagId, page any) (gjson.Result, error) {
-	query := sfclient.Query{"page": fmt.Sprintf("%v", page), "size": "20", "expand": defaultBookInfoExpand, "sort": "viewtimes", "filter": "all"}
-	return sfacg.Req.Get(fmt.Sprintf("/novels/0/sysTags/%v/novels", tagId), query)
+	return sfacg.Req.Get(fmt.Sprintf("/novels/0/sysTags/%v/novels", tagId), (sfclient.Query{"sort": "viewtimes", "filter": "all"}).SetBookInfoQuery().SetPageQuery(page))
 }
 func (sfacg *API) GetTagNameApi() (gjson.Result, error) {
 	result, err := sfacg.Req.Get("/novels/0/sysTags", sfclient.Query{"categoryId": 0})
@@ -161,16 +156,17 @@ func (sfacg *API) GetTagNameApi() (gjson.Result, error) {
 	return result.Get("data"), nil
 }
 func (sfacg *API) GetRanksWeekNovelsApi(rankType string, page any) (gjson.Result, error) {
-	return sfacg.Req.Get("/ranks/week/novels", sfclient.Query{"page": page, "size": 50, "rtype": rankType, "ntype": "origin", "expand": defaultBookInfoExpand})
+	return sfacg.Req.Get("/ranks/week/novels", (sfclient.Query{"rtype": rankType, "ntype": "origin"}).SetBookInfoQuery().SetPageQuery(page))
 }
 func (sfacg *API) GetRanksMonthNovelsApi(rankType string, page any) (gjson.Result, error) {
-	return sfacg.Req.Get("/ranks/month/novels", sfclient.Query{"page": page, "size": 50, "rtype": rankType, "ntype": "origin", "expand": defaultBookInfoExpand})
+	return sfacg.Req.Get("/ranks/month/novels", (sfclient.Query{"rtype": rankType, "ntype": "origin"}).SetBookInfoQuery().SetPageQuery(page))
 }
 func (sfacg *API) GetRanksAllNovelsApi(rankType string, page any) (gjson.Result, error) {
-	return sfacg.Req.Get("/ranks/all/novels", sfclient.Query{"page": page, "size": 50, "rtype": rankType, "ntype": "origin", "expand": defaultBookInfoExpand})
+
+	return sfacg.Req.Get("/ranks/all/novels", (sfclient.Query{"rtype": rankType, "ntype": "origin"}).SetBookInfoQuery().SetPageQuery(page))
 }
 func (sfacg *API) UpdateBooksList(page string) (gjson.Result, error) {
-	return sfacg.Req.Get("/novels", sfclient.Query{"page": page, "size": 50, "filter": "latest-signnvip", "expand": "sysTags,intro"})
+	return sfacg.Req.Get("/novels", (sfclient.Query{"filter": "latest-signnvip"}).SetBookInfoQuery().SetPageQuery(page))
 }
 
 func (sfacg *API) GetPositionApi() (gjson.Result, error) {
@@ -194,7 +190,7 @@ func (sfacg *API) GetUserWelfareStoreitemsLatestApi() (gjson.Result, error) {
 }
 
 func (sfacg *API) essaySolicitationNovelApi(tagIds, page string) (gjson.Result, error) {
-	return sfacg.Req.GetWeb("/api/essay/getNovels", sfclient.Query{"tagIds": tagIds, "page": page, "size": 50})
+	return sfacg.Req.GetWeb("/api/essay/getNovels", (sfclient.Query{"tagIds": tagIds}).SetPageQuery(page))
 }
 
 func (sfacg *API) EssayShortNovelApi(page any) (gjson.Result, error) {
@@ -226,7 +222,7 @@ func (sfacg *API) VersionInformation() (gjson.Result, error) {
 	return sfacg.Req.Get("/androidcfg", nil)
 }
 func (sfacg *API) PreOrderApi() (*resty.Response, error) {
-	return sfacg.Req.Post("/preOrder", sfclient.Query{"expand": "intro,typeName,tags,sysTags", "withExpiredPreOrder": "false"})
+	return sfacg.Req.Post("/preOrder", (sfclient.Query{"withExpiredPreOrder": "false"}).SetBookInfoQuery())
 }
 func (sfacg *API) PostSpecialPushApi() (*resty.Response, error) {
 	return sfacg.Req.Post("/specialpush", sfclient.Query{"signDate": "merchPush", "entityId": "", "entityType": "novel"})
