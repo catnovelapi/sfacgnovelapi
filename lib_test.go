@@ -37,7 +37,13 @@ func TestNewSfBookInfo(t *testing.T) {
 	}
 	t.Log(result)
 }
-
+func TestNewSfBookChapter(t *testing.T) {
+	result, err := client.App.GetChapterContentText(os.Getenv("CHAPTER_ID"))
+	if err != nil {
+		return
+	}
+	t.Log(result)
+}
 func TestNewSfBookInfoTag(t *testing.T) {
 	bookList, err := client.App.GetBookListByTag(os.Getenv("TAG_NAME"), 0)
 	if err != nil {
@@ -49,7 +55,7 @@ func TestNewSfBookInfoTag(t *testing.T) {
 		wg.Add(1)
 		go func(book gjson.Result, wg *sync.WaitGroup) {
 			defer wg.Done()
-			_, err = client.App.GetChapterDirList(book.Get("novelId").String(), true)
+			_, err = client.App.GetChapterDirList(book.Get("novelId").String(), true, nil)
 			if err != nil {
 				log.Println(err)
 			} else {
