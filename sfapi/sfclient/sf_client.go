@@ -1,6 +1,7 @@
 package sfclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/catnovelapi/sfacgnovelapi/sfapi/sfclient/sflogger"
 	"github.com/catnovelapi/sfacgnovelapi/sfapi/sfsettings"
@@ -72,7 +73,11 @@ func (s *SFRequest) newRequest(params Query, app bool) *resty.Request {
 	} else {
 		s.builderClient.SetBaseURL(s.Settings.GetWebBaseAPI())
 	}
-	return s.builderClient.R().SetHeaders(s.getHeaders()).SetQueryParams(params.ToStringMap())
+	r := s.builderClient.R().SetHeaders(s.getHeaders())
+	if params != nil {
+		r.SetQueryParams(params.ToStringMap())
+	}
+	return r
 }
 func (s *SFRequest) newLogger(rep *resty.Response) {
 	if s.debug {
@@ -97,7 +102,13 @@ func (s *SFRequest) Get(endURL string, params Query) (gjson.Result, error) {
 }
 
 func (s *SFRequest) Post(endURL string, params Query) (*resty.Response, error) {
-	rep, err := s.newRequest(params, true).Post(endURL)
+	var jsonBody string
+	if marshal, err := json.Marshal(params); err != nil {
+		jsonBody = "{}"
+	} else {
+		jsonBody = string(marshal)
+	}
+	rep, err := s.newRequest(nil, true).SetBody(jsonBody).Post(endURL)
 	defer s.newLogger(rep)
 	if err != nil {
 		return nil, err

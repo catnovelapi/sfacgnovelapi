@@ -66,3 +66,10 @@ func TestNewSfBookInfoTag(t *testing.T) {
 	wg.Wait()
 
 }
+func TestNewLogin(t *testing.T) {
+	result, err := client.App.GetCookie(os.Getenv("USERNAME"), os.Getenv("PASSWORD"))
+	if err != nil {
+		return
+	}
+	t.Log(result)
+}

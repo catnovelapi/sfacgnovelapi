@@ -4,6 +4,10 @@ import "fmt"
 
 type Query map[string]any
 
+func Q() Query {
+	return make(Query)
+}
+
 func (q Query) Encode() string {
 	var s string
 	for k, v := range q {

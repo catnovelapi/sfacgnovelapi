@@ -39,7 +39,7 @@ func (sfacg *API) GetBookInfoApi(ctx context.Context, bookId string) (gjson.Resu
 		return gjson.Result{}, err
 	}
 	defer sfacg.sem.Release(1)
-	return sfacg.Req.Get(fmt.Sprintf("/novels/%v", bookId), (sfclient.Query{}).SetBookInfoQuery())
+	return sfacg.Req.Get(fmt.Sprintf("/novels/%v", bookId), sfclient.Q().SetBookInfoQuery())
 }
 
 func (sfacg *API) GetBookCommentBarrageNewVersionApi(bookId any) (gjson.Result, error) {
@@ -68,7 +68,7 @@ func (sfacg *API) GetBookSignlevelApi(bookId any) (gjson.Result, error) {
 }
 
 func (sfacg *API) BookListApi(bookId any) (gjson.Result, error) {
-	return sfacg.Req.Get(fmt.Sprintf("/novel/%v/bookList", bookId), sfclient.Query{}.SetPageQuery(0))
+	return sfacg.Req.Get(fmt.Sprintf("/novel/%v/bookList", bookId), sfclient.Q().SetPageQuery(0))
 }
 
 func (sfacg *API) BookFansList(bookId any) (gjson.Result, error) {

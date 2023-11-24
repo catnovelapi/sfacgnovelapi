@@ -28,6 +28,11 @@ func (sfRequestLogger *SFLogger) formatRequestLogText() string {
 	if sfRequestLogger.req.QueryParam != nil {
 		body = sfRequestLogger.req.QueryParam.Encode()
 	}
+	if body == "" {
+		if sfRequestLogger.req.Body != nil {
+			body = fmt.Sprintf("%v", sfRequestLogger.req.Body)
+		}
+	}
 	reqLogText = formatLog("\n==============================================================================\n"+
 		"~~~ REQUEST ~~~\n"+
 		"HOST   : %v\n"+
