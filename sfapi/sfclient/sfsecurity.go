@@ -23,17 +23,14 @@ func (s *SFRequest) sfSecurity() string {
 	return fmt.Sprintf("nonce=%v&timestamp=%v&devicetoken=%v&sign=%v", randomDeviceToken, sTimeStamp, s.Settings.GetDeviceToken(), sign)
 }
 
-func (s *SFRequest) getHeaders() map[string]string {
-	h := map[string]string{
+func (s *SFRequest) getHeaders() map[string]any {
+	h := map[string]any{
 		"Accept-Charset": "UTF-8",
 		"Connection":     "Keep-Alive",
 		"Accept":         "application/vnd.sfacg.api+json;version=1",
 		"SFSecurity":     s.sfSecurity(),
 		"User-Agent":     s.Settings.GetUserAgent(),
 		"Content-Type":   "application/json",
-	}
-	if s.Settings.GetCookie() != "" {
-		h["cookies"] = s.Settings.GetCookie()
 	}
 	return h
 }

@@ -11,13 +11,13 @@ The SFAPI provides an API client for interacting with the SFACG website. It allo
 ### Import
 
 ```go
-import "github.com/catnovelapi/sfapi"
+import "github.com/catnovelapi/sfacgnovelapi"
 ```
 
 ### Create Client
 
 ```go
-client := sfapi.NewSfClient()
+client := sfacgnovelapi.NewSfClient()
 ```
 
 ### Client Options

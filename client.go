@@ -21,7 +21,8 @@ func (sfClient *SFClient) R() *SFClient {
 }
 
 func (sfClient *SFClient) SetDebug() *SFClient {
-	sfClient.Api.Req.ChangeLogDebug()
+	sfClient.Api.Req.LogDebug()
+
 	return sfClient
 }
 
