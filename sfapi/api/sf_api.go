@@ -5,8 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"github.com/catnovelapi/builder"
 	"github.com/catnovelapi/sfacgnovelapi/sfapi/sfclient"
-	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 	"golang.org/x/sync/semaphore"
 	"sync"
@@ -86,7 +86,7 @@ func (sfacg *API) GetAccountInMoneyApi() (gjson.Result, error) {
 }
 
 // LoginUsernameApi login by username and password
-func (sfacg *API) LoginUsernameApi(username, password string) (*resty.Response, error) {
+func (sfacg *API) LoginUsernameApi(username, password string) (*builder.Response, error) {
 	return sfacg.Req.Post("/sessions", sfclient.Query{"username": username, "password": password})
 }
 
@@ -221,9 +221,9 @@ func (sfacg *API) PostConversionsApi() (gjson.Result, error) {
 func (sfacg *API) VersionInformation() (gjson.Result, error) {
 	return sfacg.Req.Get("/androidcfg", nil)
 }
-func (sfacg *API) PreOrderApi() (*resty.Response, error) {
+func (sfacg *API) PreOrderApi() (*builder.Response, error) {
 	return sfacg.Req.Post("/preOrder", (sfclient.Query{"withExpiredPreOrder": "false"}).SetBookInfoQuery())
 }
-func (sfacg *API) PostSpecialPushApi() (*resty.Response, error) {
+func (sfacg *API) PostSpecialPushApi() (*builder.Response, error) {
 	return sfacg.Req.Post("/specialpush", sfclient.Query{"signDate": "merchPush", "entityId": "", "entityType": "novel"})
 }

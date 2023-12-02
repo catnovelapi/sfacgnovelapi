@@ -67,7 +67,7 @@ func TestNewSfBookInfoTag(t *testing.T) {
 
 }
 func TestNewLogin(t *testing.T) {
-	result, err := client.App.GetCookie(os.Getenv("USERNAME"), os.Getenv("PASSWORD"))
+	result, err := client.App.GetCookie(os.Getenv("USER_NAME"), os.Getenv("PASSWORD"))
 	if err != nil {
 		return
 	}
