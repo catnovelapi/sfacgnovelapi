@@ -44,6 +44,11 @@ func (s *SFRequest) newRequest(params Query, app bool) *builder.Request {
 	} else {
 		s.builderClient.SetBaseURL(s.Settings.GetWebBaseAPI())
 	}
+	if s.builderClient.GetClientCookie() == "" {
+		if s.Settings.GetCookie() != "" {
+			s.builderClient.SetCookie(s.Settings.GetCookie())
+		}
+	}
 	r := s.builderClient.R().SetHeaders(s.getHeaders())
 	if params != nil {
 		r.SetQueryParams(params)

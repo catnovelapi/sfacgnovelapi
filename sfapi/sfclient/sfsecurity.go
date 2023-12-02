@@ -32,8 +32,5 @@ func (s *SFRequest) getHeaders() map[string]any {
 		"User-Agent":     s.Settings.GetUserAgent(),
 		"Content-Type":   "application/json",
 	}
-	if s.Settings.GetCookie() != "" {
-		h["cookies"] = s.Settings.GetCookie()
-	}
 	return h
 }
